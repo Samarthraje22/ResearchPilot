@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "created_at": "2026-08-16",
+  "description": "ResearchPilot Phase 5 Ground-Truth Evaluation Benchmark Dataset",
+  "test_cases": [
+    {
+      "id": "TC1",
+      "type": "factual",
+      "query": "What is the Fisher information spectrum in quantum neural networks?",
+      "expected_sources": ["data/test_fixtures/research_paper.pdf"],
+      "expected_pages": [7, 8],
+      "expected_sections": ["3.4 The Fisher spectrum and the barren plateau phenomenon", "4.1 The Fisher information spectrum"],
+      "expected_keywords": ["Fisher", "spectrum", "barren plateau"],
+      "requires_recency": false,
+      "requires_multi_source": false,
+      "is_negative_case": false
+    },
+    {
+      "id": "TC2",
+      "type": "conceptual",
+      "query": "How does quantum neural network capacity compare to classical neural network capacity?",
+      "expected_sources": ["data/test_fixtures/research_paper.pdf", "arXiv"],
+      "expected_pages": [9],
+      "expected_sections": ["4.2 Capacity analysis"],
+      "expected_keywords": ["Fisher-Rao", "capacity", "250%"],
+      "requires_recency": false,
+      "requires_multi_source": false,
+      "is_negative_case": false
+    },
+    {
+      "id": "TC3",
+      "type": "comparative",
+      "query": "Compare quantum neural network capacity analysis with surface-code hybrid quantum error correction techniques.",
+      "expected_sources": ["data/test_fixtures/research_paper.pdf", "data/test_fixtures/test_fixture_quantum_error_correction.pdf"],
+      "expected_pages": [1, 9, 21],
+      "expected_sections": ["4.2 Capacity analysis", "2 Methodology"],
+      "expected_keywords": ["capacity", "surface-code", "mitigation"],
+      "requires_recency": false,
+      "requires_multi_source": true,
+      "is_negative_case": false
+    },
+    {
+      "id": "TC4",
+      "type": "recency",
+      "query": "Analyze recent 2024-2026 approaches to quantum neural networks and identify research gaps.",
+      "expected_sources": ["arXiv"],
+      "publication_window": [2023, 2026],
+      "expected_keywords": ["quantum", "neural", "recent"],
+      "requires_recency": true,
+      "requires_multi_source": false,
+      "is_negative_case": false,
+      "fallback_expected_notice": "[RECENCY NOTICE]"
+    },
+    {
+      "id": "TC5",
+      "type": "multi_source",
+      "query": "What are the theoretical foundations of quantum neural networks across academic literature?",
+      "expected_sources": ["data/test_fixtures/research_paper.pdf", "arXiv"],
+      "expected_keywords": ["power", "functions", "neural"],
+      "requires_recency": false,
+      "requires_multi_source": true,
+      "is_negative_case": false
+    },
+    {
+      "id": "TC6",
+      "type": "negative_insufficient_evidence",
+      "query": "What is the specific performance impact of 1000-qubit topological braiding on classical image classification in research_paper.pdf?",
+      "expected_sources": [],
+      "expected_keywords": [],
+      "requires_recency": false,
+      "requires_multi_source": false,
+      "is_negative_case": true,
+      "expected_claim_status": "Unsupported ❌"
+    }
+  ]
+}

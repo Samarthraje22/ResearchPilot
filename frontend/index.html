@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResearchPilot | AI Research Analysis Workspace</title>
+  <meta name="description" content="Bounded multi-step autonomous AI research platform with evidence verification and document-driven analysis.">
+  <link rel="stylesheet" href="/static/index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="brand-title">ResearchPilot</span>
+      </div>
+      <nav class="nav-links">
+        <button id="btn-open-history" class="btn btn-secondary">Saved Sessions</button>
+        <button id="btn-header-upload" class="btn btn-primary">Upload PDF</button>
+        <button id="btn-open-benchmark" class="btn btn-secondary">Evaluation Results</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    
+    <!-- User Documents Registry Section -->
+    <section class="documents-section">
+      <div class="section-card">
+        <div class="card-header">
+          <div>
+            <h2 class="section-title">Research Documents</h2>
+            <p class="section-subtitle">Select uploaded PDF documents to include as primary evidence for research analysis.</p>
+          </div>
+          <button id="btn-upload-trigger" class="btn btn-secondary">Upload PDF</button>
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="docs-empty-state" class="empty-state-box">
+          <div class="empty-icon-badge">DOCS</div>
+          <h3 class="empty-title">No research documents yet</h3>
+          <p class="empty-desc">Upload a PDF to start analyzing your research material.</p>
+          <button id="btn-empty-upload" class="btn btn-primary">Upload PDF</button>
+        </div>
+
+        <!-- Documents Grid List -->
+        <div id="docs-grid" class="docs-grid hidden">
+          <!-- Dynamically Rendered Document Cards with Checkboxes -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Discovered Related Academic Literature Section -->
+    <section id="related-papers-section" class="related-papers-section hidden">
+      <div class="section-card">
+        <div class="card-header">
+          <div>
+            <h2 class="section-title">Related Academic Papers</h2>
+            <p class="section-subtitle">Discovered real academic literature on arXiv matching your uploaded document's research topic profile.</p>
+          </div>
+          <button id="btn-add-selected-related" class="btn btn-sm btn-primary">Add Selected Sources to Analysis</button>
+        </div>
+
+        <div id="related-papers-list" class="related-papers-list">
+          <!-- Dynamically Populated Related Academic Papers -->
+        </div>
+
+        <div id="no-related-papers-msg" class="empty-notice hidden">
+          <span>No sufficiently relevant academic papers were found for this document.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Validation Error Banner -->
+    <div id="validation-banner" class="banner banner-error hidden">
+      <span class="banner-tag">VALIDATION NOTICE</span>
+      <span id="validation-message">Please upload a research document and enter a research question before starting the analysis.</span>
+    </div>
+
+    <!-- Research Query Section -->
+    <section class="query-section">
+      <div class="query-card">
+        <h1 class="query-title">Research Analysis & Evidence Verification</h1>
+        <p class="query-subtitle">Enter a research question to analyze evidence across selected documents and discover relevant academic literature.</p>
+        
+        <form id="research-form" class="query-form">
+          <div class="input-wrapper">
+            <textarea id="query-input" class="query-input" placeholder="Enter your research question..." rows="3"></textarea>
+          </div>
+
+          <!-- Inline Form Validation Notice -->
+          <div id="form-inline-validation" class="banner banner-error hidden" style="margin-bottom: 0.5rem;">
+            <span class="banner-tag">VALIDATION NOTICE</span>
+            <span id="form-inline-message">Please upload a research document before starting the analysis.</span>
+          </div>
+          
+          <div class="controls-bar">
+            <div class="toggle-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-arxiv" checked>
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-label">Search Academic Sources</span>
+            </div>
+
+            <div class="select-group">
+              <label for="select-threshold" class="select-label">Evidence Check Threshold:</label>
+              <select id="select-threshold" class="select-input">
+                <option value="0.35" selected>0.35 (Standard Check)</option>
+                <option value="0.25">0.25 (Permissive Check)</option>
+                <option value="0.50">0.50 (Strict Check)</option>
+              </select>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn btn-primary">
+              <span id="btn-text">Analyze Research</span>
+              <span id="btn-spinner" class="spinner hidden"></span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Document-Aware Suggested Questions -->
+        <div id="suggested-queries-box" class="preset-queries hidden">
+          <span class="preset-label">Suggested Questions for Selected Document:</span>
+          <div id="suggested-queries-list" class="presets-list">
+            <!-- Dynamically Populated Document-Aware Questions -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Stage Stepper Progress Bar -->
+    <section id="progress-section" class="progress-section hidden">
+      <div class="stepper-card">
+        <div class="stepper-header">
+          <span id="stepper-status-title" class="stepper-title">Analyzing Research Material...</span>
+          <span id="stepper-timer" class="stepper-timer">0.0s</span>
+        </div>
+        <div class="stepper-track">
+          <div class="step-item" id="step-planning">
+            <span class="step-num">1</span>
+            <span class="step-name">Planning</span>
+          </div>
+          <div class="step-item" id="step-discovery">
+            <span class="step-num">2</span>
+            <span class="step-name">Discovery</span>
+          </div>
+          <div class="step-item" id="step-retrieval">
+            <span class="step-num">3</span>
+            <span class="step-name">Retrieval</span>
+          </div>
+          <div class="step-item" id="step-gate">
+            <span class="step-num">4</span>
+            <span class="step-name">Evidence Check</span>
+          </div>
+          <div class="step-item" id="step-synthesis">
+            <span class="step-num">5</span>
+            <span class="step-name">Synthesis</span>
+          </div>
+          <div class="step-item" id="step-verification">
+            <span class="step-num">6</span>
+            <span class="step-name">Verification</span>
+          </div>
+        </div>
+        <p id="stepper-message" class="stepper-message">Initializing research workflow...</p>
+      </div>
+    </section>
+
+    <!-- Insufficient Evidence Notice Banner -->
+    <div id="insufficient-banner" class="banner banner-warning hidden">
+      <div class="banner-content">
+        <span class="banner-tag">NOT ENOUGH EVIDENCE</span>
+        <p id="insufficient-text">The selected research documents do not contain documented evidence addressing your specific query. Speculative factual synthesis has been skipped to prevent ungrounded claims.</p>
+      </div>
+    </div>
+
+    <!-- Results Display Layout -->
+    <section id="results-section" class="results-section hidden">
+      
+      <!-- User-Facing Primary Metrics Bar -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-value" id="m-latency">0.0s</span>
+          <span class="metric-label">Execution Time</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value" id="m-llm-calls">0</span>
+          <span class="metric-label">AI Processing Steps</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value" id="m-groundedness">100%</span>
+          <span class="metric-label">Evidence Support</span>
+          <span class="metric-subtext" id="m-groundedness-context">Strongly supported by sources.</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value" id="m-sources">0</span>
+          <span class="metric-label">Sources Used</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-value" id="m-gate-status">PASSED</span>
+          <span class="metric-label">Evidence Check</span>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="content-grid">
+        
+        <!-- Left: Research Report Document -->
+        <article class="report-card">
+          <div class="report-header">
+            <h2>Synthesized Research Report</h2>
+            <div class="report-actions">
+              <button id="btn-export-markdown" class="btn btn-sm btn-secondary">Copy Markdown</button>
+              <button id="btn-toggle-advanced" class="btn btn-sm btn-secondary">Advanced Details</button>
+            </div>
+          </div>
+
+          <!-- Expandable Technical Details Area -->
+          <div id="advanced-details-box" class="advanced-box hidden">
+            <h4>Technical Metrics & Breakdown</h4>
+            <div class="tech-metrics-grid">
+              <div><strong>Search Accuracy:</strong> <span id="adv-precision">1.00</span></div>
+              <div><strong>Relevant Evidence Found:</strong> <span id="adv-recall">1.00</span></div>
+              <div><strong>Sources Compared:</strong> <span id="adv-diversity">1.0</span></div>
+              <div><strong>Recent Source Coverage:</strong> <span id="adv-recency">1.00</span></div>
+            </div>
+          </div>
+
+          <div id="report-content" class="report-body">
+            <!-- Dynamically Rendered Report HTML -->
+          </div>
+
+          <!-- Follow-up Questions & Chat Container -->
+          <div id="followup-container" class="followup-container">
+            <div class="followup-header">
+              <h3 class="followup-title">Follow-up Questions & Synthesis</h3>
+              <span class="followup-hint">Ask follow-up questions on this report & evidence without re-running arXiv discovery</span>
+            </div>
+            <div id="followup-chat-list" class="followup-chat-list">
+              <!-- Chat turns dynamically appended -->
+            </div>
+            <form id="followup-form" class="followup-form">
+              <input type="text" id="followup-input" class="followup-input" placeholder="Ask a follow-up question regarding this report...">
+              <button type="submit" id="btn-followup-submit" class="btn btn-sm btn-primary">
+                <span id="btn-followup-text">Send</span>
+                <span id="btn-followup-spinner" class="btn-spinner spinner-small hidden"></span>
+              </button>
+            </form>
+          </div>
+        </article>
+
+        <!-- Right: Claim Verification Drawer -->
+        <aside class="verification-card">
+          <div class="verification-header">
+            <h2>Evidence Verification</h2>
+            <div class="filter-buttons">
+              <button class="btn-filter active" data-filter="ALL">ALL</button>
+              <button class="btn-filter" data-filter="SUPPORTED">SUPPORTED</button>
+              <button class="btn-filter" data-filter="PARTIALLY SUPPORTED">PARTIALLY</button>
+              <button class="btn-filter" data-filter="UNSUPPORTED">UNSUPPORTED</button>
+            </div>
+          </div>
+          <div id="claims-list" class="claims-list">
+            <!-- Dynamically Rendered Claim Verification Badges -->
+          </div>
+        </aside>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Citation Inspector Modal -->
+  <div id="modal-citation" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="cit-modal-title">Citation Inspector</h3>
+        <button id="btn-close-cit-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="cit-meta-row">
+          <span class="cit-meta-item"><strong>Source:</strong> <span id="cit-source">--</span></span>
+          <span class="cit-meta-item"><strong>Published:</strong> <span id="cit-year">--</span></span>
+          <span class="cit-meta-item"><strong>Page:</strong> <span id="cit-page">--</span></span>
+          <span class="cit-meta-item"><strong>Section:</strong> <span id="cit-section">--</span></span>
+        </div>
+        <div class="cit-content-box">
+          <span class="cit-box-label">Verbatim Evidence:</span>
+          <p id="cit-text">--</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Upload Modal -->
+  <div id="modal-upload" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Upload Research Document</h3>
+        <button id="btn-close-upload-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="upload-desc">Upload a PDF document (.pdf) to start analyzing your research material. The document will be indexed and available for selection.</p>
+        
+        <form id="upload-form" class="upload-form">
+          <input type="file" id="pdf-file-input" accept=".pdf" required class="file-input">
+          <button type="submit" id="btn-upload-submit" class="btn btn-primary">Upload PDF</button>
+        </form>
+        <p id="upload-status-text" class="upload-status"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Benchmark / Evaluation Modal -->
+  <div id="modal-benchmark" class="modal-backdrop hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>Evaluation Results</h3>
+        <button id="btn-close-benchmark-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="benchmark-content">Loading machine-readable evaluation results...</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Saved Sessions / History Modal -->
+  <div id="modal-history" class="modal-backdrop hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>Research History & Saved Sessions</h3>
+        <button id="btn-close-history-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="history-actions-bar">
+          <span class="history-count" id="history-count-text">0 saved sessions</span>
+          <button id="btn-clear-all-history" class="btn btn-sm btn-secondary">Clear All History</button>
+        </div>
+        <div id="history-list" class="history-list">
+          <!-- Dynamically rendered history items -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
