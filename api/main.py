@@ -431,6 +431,7 @@ async def upload_pdf_source(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="File size exceeds maximum allowed limit of 15MB.")
 
     filename = os.path.basename(file.filename)
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
     target_path = os.path.join(UPLOADS_DIR, filename)
 
     try:
@@ -449,6 +450,8 @@ async def upload_pdf_source(file: UploadFile = File(...)):
             "message": f"Successfully uploaded and indexed {filename}."
         }
     except Exception as e:
+        import traceback
+        print(f"[Upload Error] {traceback.format_exc()}", flush=True)
         raise HTTPException(status_code=500, detail=f"Failed to process PDF upload: {str(e)}")
 
 
