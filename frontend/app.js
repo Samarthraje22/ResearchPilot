@@ -787,15 +787,20 @@ async function fetchRelatedPapersForSelectedDocuments(selectedDocs) {
               }
             );
 
-          const data =
-            await resp.json();
+          let data = {};
+          try {
+            data = await resp.json();
+          } catch (jsonErr) {
+            const rawText = await resp.text().catch(() => '');
+            data = { detail: rawText || `Server responded with HTTP ${resp.status}` };
+          }
 
           if (resp.ok) {
             uploadStatusText.style.color =
               '#34D399';
 
             uploadStatusText.textContent =
-              data.message;
+              data.message || 'File uploaded and indexed successfully.';
 
             pdfFileInput.value = '';
 

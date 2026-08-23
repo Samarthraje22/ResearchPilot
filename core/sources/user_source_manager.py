@@ -8,10 +8,17 @@ from core.utils.cache import suggested_questions_cache, general_cache
 from core.llm.router import LLMRouter
 
 
+import tempfile
+
+
 class UserSourceManager:
     def __init__(self, uploads_dir: str = "data/uploads"):
-        self.uploads_dir = os.path.abspath(uploads_dir)
-        os.makedirs(self.uploads_dir, exist_ok=True)
+        try:
+            self.uploads_dir = os.path.abspath(uploads_dir)
+            os.makedirs(self.uploads_dir, exist_ok=True)
+        except Exception:
+            self.uploads_dir = os.path.join(tempfile.gettempdir(), "researchpilot", "uploads")
+            os.makedirs(self.uploads_dir, exist_ok=True)
         # Selection state dictionary: { doc_id: bool }
         self.selection_state: Dict[str, bool] = {}
 

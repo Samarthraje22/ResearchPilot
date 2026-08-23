@@ -4,6 +4,7 @@ import sys
 import time
 import re
 import asyncio
+import tempfile
 from typing import AsyncGenerator, List, Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,12 +36,25 @@ from api.schemas import (
 )
 from core.llm.router import LLMRouter
 
-# Directory Setup
-UPLOADS_DIR = os.path.join(REPO_ROOT, "data", "uploads")
-PAPERS_DIR = os.path.join(REPO_ROOT, "data", "papers")
+# Directory Setup (Use /tmp on Vercel/serverless where root filesystem is read-only)
+IS_SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+if IS_SERVERLESS:
+    UPLOADS_DIR = os.path.join(tempfile.gettempdir(), "researchpilot", "uploads")
+    PAPERS_DIR = os.path.join(tempfile.gettempdir(), "researchpilot", "papers")
+else:
+    UPLOADS_DIR = os.path.join(REPO_ROOT, "data", "uploads")
+    PAPERS_DIR = os.path.join(REPO_ROOT, "data", "papers")
+
 FRONTEND_DIR = os.path.join(REPO_ROOT, "frontend")
-os.makedirs(UPLOADS_DIR, exist_ok=True)
-os.makedirs(PAPERS_DIR, exist_ok=True)
+
+try:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    os.makedirs(PAPERS_DIR, exist_ok=True)
+except Exception:
+    UPLOADS_DIR = os.path.join(tempfile.gettempdir(), "researchpilot", "uploads")
+    PAPERS_DIR = os.path.join(tempfile.gettempdir(), "researchpilot", "papers")
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    os.makedirs(PAPERS_DIR, exist_ok=True)
 
 user_source_manager = UserSourceManager(uploads_dir=UPLOADS_DIR)
 topic_discovery_engine = TopicDiscoveryEngine()
