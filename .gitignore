@@ -10,3 +10,8 @@ __pycache__/
 .idea/
 data/uploads/*
 data/cache/*
+scratch/
+test_*.py
+.pytest_cache/
+.vercel/
+

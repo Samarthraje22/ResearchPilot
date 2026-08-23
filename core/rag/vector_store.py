@@ -1,46 +1,57 @@
-import faiss
 import numpy as np
-
 from .document import Document
 
 
 class VectorStore:
+    """
+    High-performance in-memory Vector Store using pure NumPy cosine similarity.
+    Replaces heavy C++ FAISS binaries while providing identical mathematical accuracy.
+    """
 
-    def __init__(self, dimension: int):
-        self.index = faiss.IndexFlatIP(dimension)
+    def __init__(self, dimension: int = 384):
+        self.dimension = dimension
         self.documents = []
+        self.vectors = np.empty((0, dimension), dtype="float32")
 
     def add(self, documents: list[Document], embeddings):
+        if embeddings is None or len(embeddings) == 0:
+            return
 
-        vectors = np.array(embeddings).astype("float32")
+        new_vecs = np.array(embeddings, dtype="float32")
+        if new_vecs.ndim == 1:
+            new_vecs = new_vecs.reshape(1, -1)
 
-        faiss.normalize_L2(vectors)
+        # L2 Normalize vectors for cosine similarity via dot product
+        norms = np.linalg.norm(new_vecs, axis=1, keepdims=True)
+        norms[norms == 0] = 1e-10
+        new_vecs = new_vecs / norms
 
-        self.index.add(vectors)
+        if self.vectors.shape[0] == 0:
+            self.vectors = new_vecs
+        else:
+            self.vectors = np.vstack([self.vectors, new_vecs])
+
         self.documents.extend(documents)
 
     def search(self, query_embedding, top_k: int = 3):
+        if len(self.documents) == 0 or self.vectors.shape[0] == 0:
+            return []
 
-        query_vector = np.array(
-            [query_embedding]
-        ).astype("float32")
+        q_vec = np.array(query_embedding, dtype="float32").flatten()
+        norm = np.linalg.norm(q_vec)
+        if norm > 0:
+            q_vec = q_vec / norm
 
-        faiss.normalize_L2(query_vector)
+        # Cosine similarity via inner product of normalized vectors
+        scores = np.dot(self.vectors, q_vec)
 
-        scores, indices = self.index.search(
-            query_vector,
-            top_k
-        )
+        # Get top-k highest scoring indices
+        top_k = min(top_k, len(scores))
+        top_indices = np.argsort(scores)[::-1][:top_k]
 
         results = []
-
-        for score, index in zip(
-            scores[0],
-            indices[0]
-        ):
-            if index != -1:
-                results.append(
-                    (self.documents[index], score)
-                )
+        for idx in top_indices:
+            if idx < len(self.documents):
+                results.append((self.documents[idx], float(scores[idx])))
 
         return results
