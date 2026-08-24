@@ -2,8 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/main.py",
-      "use": "@vercel/python"
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["core/**", "eval/**", "frontend/**"]
+      }
     },
     {
       "src": "frontend/**",
@@ -17,15 +20,15 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/main.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/docs",
-      "dest": "/api/main.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/openapi.json",
-      "dest": "/api/main.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/",
