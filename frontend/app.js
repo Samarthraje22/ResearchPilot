@@ -676,63 +676,64 @@ async function fetchRelatedPapersForSelectedDocuments(selectedDocs) {
 
   // Fetch Document-Aware Suggested Questions
   async function fetchSuggestedQuestions(documentId) {
-    try {
-      const resp =
-        await fetch(
-          `/api/sources/${documentId}/suggested-questions`
-        );
+    if (!suggestedQueriesBox || !suggestedQueriesList) return;
 
-      if (!resp.ok) {
-        return;
+    suggestedQueriesBox.classList.remove('hidden');
+    suggestedQueriesList.innerHTML =
+      '<span style="color: var(--text-muted); font-size: 0.82rem;">⚡ Formulating document-specific suggested questions...</span>';
+
+    try {
+      const resp = await fetch(`/api/sources/${documentId}/suggested-questions`);
+
+      let questions = [];
+      if (resp.ok) {
+        const data = await resp.json();
+        questions = data.suggested_questions || [];
       }
 
-      const data =
-        await resp.json();
+      if (questions.length === 0) {
+        questions = [
+          "What primary problem or methodology does this research address?",
+          "What are the main findings and experimental results presented?",
+          "How does this approach compare to prior scientific baselines?",
+          "What limitations, assumptions, or future work are highlighted?"
+        ];
+      }
 
       suggestedQueriesList.innerHTML = '';
-
-      if (
-        data.suggested_questions &&
-        data.suggested_questions.length > 0
-      ) {
-        suggestedQueriesBox.classList.remove(
-          'hidden'
-        );
-
-        data.suggested_questions.forEach(q => {
-          const btn =
-            document.createElement('button');
-
-          btn.className =
-            'btn-suggested';
-
-          btn.textContent = q;
-
-          btn.addEventListener(
-            'click',
-            () => {
-              queryInput.value = q;
-              queryInput.focus();
-              validationBanner.classList.add(
-                'hidden'
-              );
-            }
-          );
-
-          suggestedQueriesList.appendChild(btn);
+      questions.forEach(q => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-suggested';
+        btn.textContent = q;
+        btn.addEventListener('click', () => {
+          queryInput.value = q;
+          queryInput.focus();
+          validationBanner.classList.add('hidden');
         });
-
-      } else {
-        suggestedQueriesBox.classList.add(
-          'hidden'
-        );
-      }
+        suggestedQueriesList.appendChild(btn);
+      });
 
     } catch (err) {
-      console.error(
-        "Failed to load suggested questions:",
-        err
-      );
+      console.error("Failed to load suggested questions:", err);
+      // Resilient fallback questions on network error
+      const fallbackQuestions = [
+        "What primary problem does this research address?",
+        "What methodology and models are proposed in this paper?",
+        "What are the main empirical findings and results?",
+        "What limitations and future directions are identified?"
+      ];
+      suggestedQueriesList.innerHTML = '';
+      fallbackQuestions.forEach(q => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-suggested';
+        btn.textContent = q;
+        btn.addEventListener('click', () => {
+          queryInput.value = q;
+          queryInput.focus();
+          validationBanner.classList.add('hidden');
+        });
+        suggestedQueriesList.appendChild(btn);
+      });
     }
   }
 

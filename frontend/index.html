@@ -93,6 +93,14 @@
             <textarea id="query-input" class="query-input" placeholder="Enter your research question..." rows="3"></textarea>
           </div>
 
+          <!-- Document-Aware Suggested Questions (Immediately visible under query input) -->
+          <div id="suggested-queries-box" class="preset-queries hidden" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="preset-label">Suggested Questions for Selected Document:</span>
+            <div id="suggested-queries-list" class="presets-list">
+              <!-- Dynamically Populated Document-Aware Questions -->
+            </div>
+          </div>
+
           <!-- Inline Form Validation Notice -->
           <div id="form-inline-validation" class="banner banner-error hidden" style="margin-bottom: 0.5rem;">
             <span class="banner-tag">VALIDATION NOTICE</span>
@@ -123,14 +131,6 @@
             </button>
           </div>
         </form>
-
-        <!-- Document-Aware Suggested Questions -->
-        <div id="suggested-queries-box" class="preset-queries hidden">
-          <span class="preset-label">Suggested Questions for Selected Document:</span>
-          <div id="suggested-queries-list" class="presets-list">
-            <!-- Dynamically Populated Document-Aware Questions -->
-          </div>
-        </div>
       </div>
     </section>
 
